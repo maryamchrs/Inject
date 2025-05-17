@@ -3,7 +3,7 @@ import Foundation
 
 private func readIncludefile(workingDirectory: URL) throws -> [String] {
     let injectDirectory = workingDirectory.appendingPathComponent(".inject")
-    let IncludefileURL = injectDirectory.appendingPathComponent("Includefile")
+    let includefileURL = injectDirectory.appendingPathComponent("Includefile")
 
     // Check if .inject directory exists
     guard FileManager.default.fileExists(atPath: injectDirectory.path) else {
@@ -11,9 +11,10 @@ private func readIncludefile(workingDirectory: URL) throws -> [String] {
     }
 
     // Check if Includefile exists
-    guard FileManager.default.fileExists(atPath: importfileURL.path) else {
+    guard FileManager.default.fileExists(atPath: includefileURL.path) else {
         return []
     }
+
     guard let content = try? String(contentsOf: includefileURL, encoding: .utf8) else {
         return []
     }
