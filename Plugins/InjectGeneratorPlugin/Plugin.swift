@@ -2,7 +2,18 @@ import PackagePlugin
 import Foundation
 
 private func readIncludefile(workingDirectory: URL) throws -> [String] {
-    let includefileURL = workingDirectory.appendingPathComponent(".inject").appendingPathComponent("Includefile")
+    let injectDirectory = workingDirectory.appendingPathComponent(".inject")
+    let IncludefileURL = injectDirectory.appendingPathComponent("Includefile")
+
+    // Check if .inject directory exists
+    guard FileManager.default.fileExists(atPath: injectDirectory.path) else {
+        return []
+    }
+
+    // Check if Includefile exists
+    guard FileManager.default.fileExists(atPath: importfileURL.path) else {
+        return []
+    }
     guard let content = try? String(contentsOf: includefileURL, encoding: .utf8) else {
         return []
     }
@@ -12,7 +23,20 @@ private func readIncludefile(workingDirectory: URL) throws -> [String] {
 }
 
 private func readImportfile(workingDirectory: URL) throws -> [String] {
-    let importfileURL = workingDirectory.appendingPathComponent(".inject").appendingPathComponent("Importfile")
+    let injectDirectory = workingDirectory.appendingPathComponent(".inject")
+    let importfileURL = injectDirectory.appendingPathComponent("Importfile")
+
+    // Check if .inject directory exists
+    guard FileManager.default.fileExists(atPath: injectDirectory.path) else {
+        return []
+    }
+
+    // Check if Importfile exists
+    guard FileManager.default.fileExists(atPath: importfileURL.path) else {
+        return []
+    }
+
+    // Try to read the file content
     guard let content = try? String(contentsOf: importfileURL, encoding: .utf8) else {
         return []
     }
