@@ -4,17 +4,12 @@ import Foundation
 private func readIncludefile(workingDirectory: URL) -> [String] {
     let injectDirectory = workingDirectory.appendingPathComponent(".inject")
     let includefileURL = injectDirectory.appendingPathComponent("Includefile")
-
-    // Check if .inject directory exists
-    guard FileManager.default.fileExists(atPath: injectDirectory.path) else {
+    let fileManager = FileManager.default
+    // Ensure both .inject directory and Includefile exist
+    guard fileManager.fileExists(atPath: injectDirectory.path),
+          fileManager.fileExists(atPath: includefileURL.path) else {
         return []
     }
-
-    // Check if Includefile exists
-    guard FileManager.default.fileExists(atPath: includefileURL.path) else {
-        return []
-    }
-
     guard let content = try? String(contentsOf: includefileURL, encoding: .utf8) else {
         return []
     }
@@ -26,14 +21,10 @@ private func readIncludefile(workingDirectory: URL) -> [String] {
 private func readImportfile(workingDirectory: URL) -> [String] {
     let injectDirectory = workingDirectory.appendingPathComponent(".inject")
     let importfileURL = injectDirectory.appendingPathComponent("Importfile")
-
-    // Check if .inject directory exists
-    guard FileManager.default.fileExists(atPath: injectDirectory.path) else {
-        return []
-    }
-
-    // Check if Importfile exists
-    guard FileManager.default.fileExists(atPath: importfileURL.path) else {
+    let fileManager = FileManager.default
+    // Ensure both .inject directory and Importfile exist
+    guard fileManager.fileExists(atPath: injectDirectory.path),
+          fileManager.fileExists(atPath: importfileURL.path) else {
         return []
     }
 
