@@ -1,7 +1,7 @@
 import PackagePlugin
 import Foundation
 
-private func readIncludefile(workingDirectory: URL) throws -> [String] {
+private func readIncludefile(workingDirectory: URL) -> [String] {
     let injectDirectory = workingDirectory.appendingPathComponent(".inject")
     let includefileURL = injectDirectory.appendingPathComponent("Includefile")
 
@@ -23,7 +23,7 @@ private func readIncludefile(workingDirectory: URL) throws -> [String] {
         .filter { !$0.isEmpty && !$0.hasPrefix("#") }
 }
 
-private func readImportfile(workingDirectory: URL) throws -> [String] {
+private func readImportfile(workingDirectory: URL) -> [String] {
     let injectDirectory = workingDirectory.appendingPathComponent(".inject")
     let importfileURL = injectDirectory.appendingPathComponent("Importfile")
 
@@ -79,29 +79,37 @@ struct InjectGeneratorPlugin: BuildToolPlugin {
         
         // Read paths from Includefile and append additional source files
         let targetDirectoryURL = URL(fileURLWithPath: target.directory.string)
-        let includePaths = try readIncludefile(workingDirectory: targetDirectoryURL)
+        let includePaths = readIncludefile(workingDirectory: targetDirectoryURL)
         for relativePath in includePaths {
             let absoluteURL = targetDirectoryURL.appendingPathComponent(relativePath)
             sourceFileURLs.append(contentsOf: try findSwiftFiles(in: absoluteURL))
         }
         
         // Read imports from Importfile
-        let imports = try readImportfile(workingDirectory: targetDirectoryURL)
-        
+        let imports = readImportfile(workingDirectory: targetDirectoryURL)
+
         let sourceDirURLs = Set(sourceFileURLs.map { $0.deletingLastPathComponent() })
-        
+
+        // Build the arguments dynamically
+        var arguments: [String] = [
+            "--source-dirs", sourceDirURLs.map(\.path).joined(separator: ","),
+            "--output", outputFileURL.path // Use URL path string for argument
+        ]
+
+        // Only add the imports flag if there are actually imports
+        if !imports.isEmpty {
+            arguments.append("--imports")
+            arguments.append(imports.joined(separator: ","))
+        }
+
         // Create the command using URLs
         return [
             .buildCommand(
                 displayName: "Generating Dependency Container",
-                executable: injectPlugin.url, // Use URL
-                arguments: [
-                    "--source-dirs", sourceDirURLs.map(\.path).joined(separator: ","),
-                    "--output", outputFileURL.path, // Use URL path string for argument
-                    "--imports", imports.joined(separator: ",")
-                ],
-                inputFiles: sourceFileURLs, // Use [URL]
-                outputFiles: [outputFileURL] // Use [URL]
+                executable: injectPlugin.url,
+                arguments: arguments,
+                inputFiles: sourceFileURLs,
+                outputFiles: [outputFileURL]
             )
         ]
     }
@@ -129,29 +137,37 @@ extension InjectGeneratorPlugin: XcodeBuildToolPlugin {
         
         // Read paths from Injectfile and append additional source files
         let projectDirectoryURL = context.xcodeProject.directoryURL
-        let includePaths = try readIncludefile(workingDirectory: projectDirectoryURL)
+        let includePaths = readIncludefile(workingDirectory: projectDirectoryURL)
         for relativePath in includePaths {
             let absoluteURL = projectDirectoryURL.appendingPathComponent(relativePath)
             sourceFileURLs.append(contentsOf: try findSwiftFiles(in: absoluteURL))
         }
         
         // Read imports from Importfile
-        let imports = try readImportfile(workingDirectory: projectDirectoryURL)
+        let imports = readImportfile(workingDirectory: projectDirectoryURL)
         
         let sourceDirURLs = Set(sourceFileURLs.map { $0.deletingLastPathComponent() })
-        
+
+        // Build the arguments dynamically
+        var arguments: [String] = [
+            "--source-dirs", sourceDirURLs.map(\.path).joined(separator: ","),
+            "--output", outputFileURL.path // Use URL path string for argument
+        ]
+
+        // Only add the imports flag if there are actually imports
+        if !imports.isEmpty {
+            arguments.append("--imports")
+            arguments.append(imports.joined(separator: ","))
+        }
+
         // Create the command using URLs
         return [
             .buildCommand(
                 displayName: "Generating Dependency Container",
-                executable: injectPlugin.url, // Use URL
-                arguments: [
-                    "--source-dirs", sourceDirURLs.map(\.path).joined(separator: ","),
-                    "--output", outputFileURL.path, // Use URL path string for argument
-                    "--imports", imports.joined(separator: ",")
-                ],
-                inputFiles: sourceFileURLs, // Use [URL]
-                outputFiles: [outputFileURL] // Use [URL]
+                executable: injectPlugin.url,
+                arguments: arguments,
+                inputFiles: sourceFileURLs,
+                outputFiles: [outputFileURL]
             )
         ]
     }
