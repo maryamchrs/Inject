@@ -7,7 +7,7 @@ private func readIncludefile(workingDirectory: URL) -> [String] {
     let fileManager = FileManager.default
     // Ensure both .inject directory and Includefile exist
     guard fileManager.fileExists(atPath: injectDirectory.path),
-          fileManager.fileExists(atPath: includeFileURL.path) else {
+          fileManager.fileExists(atPath: includefileURL.path) else {
         return []
     }
     guard let content = try? String(contentsOf: includefileURL, encoding: .utf8) else {
