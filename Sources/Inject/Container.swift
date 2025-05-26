@@ -69,6 +69,7 @@ public final class AppContainer: @unchecked Sendable {
 
 #else
 // Swift 6 and later: Use @MainActor isolation
+@preconcurrency
 @MainActor // Isolate container operations to the main thread
 public final class AppContainer { // No Sendable conformance needed explicitly due to @MainActor
     public static let shared = AppContainer() // Access must be from MainActor
