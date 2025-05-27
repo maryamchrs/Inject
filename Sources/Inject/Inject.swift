@@ -36,6 +36,7 @@ public final class Inject<T> {
 }
 #else
 // Swift 6+: T must be Sendable, property wrapper isolated to MainActor.
+@preconcurrency
 @propertyWrapper
 @MainActor // Ensures wrappedValue access is on MainActor for sync call to container.
 public final class Inject<T> {
