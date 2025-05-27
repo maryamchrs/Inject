@@ -3,7 +3,7 @@
 
 import Foundation
 
-#if swift(<6.0)
+//#if swift(<6.0)
 // Swift 5 compatibility: No Sendable constraint, synchronous access assumes caller context or handles thread safety via lock.
 @propertyWrapper
 public final class Inject<T> {
@@ -34,35 +34,35 @@ public final class Inject<T> {
     }
     #endif
 }
-#else
-// Swift 6+: T must be Sendable, property wrapper isolated to MainActor.
-@propertyWrapper
-@MainActor // Ensures wrappedValue access is on MainActor for sync call to container.
-public final class Inject<T> {
-    private var value: T?
-    // No explicit lock needed due to @MainActor isolation for access.
-    
-    public var wrappedValue: T {
-        // Access is guaranteed to be on MainActor.
-        if let value = value {
-            return value
-        }
-        
-        // Synchronous call is safe because both Inject and AppContainer are @MainActor isolated.
-        // T is constrained to Sendable as required by the Swift 6+ AppContainer.resolve.
-        let resolvedValue = AppContainer.shared.resolve(type: T.self)
-        value = resolvedValue
-        return resolvedValue
-    }
-    
-    public init() {}
-    
-    /// Allows setting a mock value for testing purposes.
-    /// Must be called from MainActor.
-    #if DEBUG
-    public func setForTesting(_ newValue: T) {
-        value = newValue
-    }
-    #endif
-}
-#endif
+//#else
+//// Swift 6+: T must be Sendable, property wrapper isolated to MainActor.
+//@propertyWrapper
+//@MainActor // Ensures wrappedValue access is on MainActor for sync call to container.
+//public final class Inject<T> {
+//    private var value: T?
+//    // No explicit lock needed due to @MainActor isolation for access.
+//    
+//    public var wrappedValue: T {
+//        // Access is guaranteed to be on MainActor.
+//        if let value = value {
+//            return value
+//        }
+//        
+//        // Synchronous call is safe because both Inject and AppContainer are @MainActor isolated.
+//        // T is constrained to Sendable as required by the Swift 6+ AppContainer.resolve.
+//        let resolvedValue = AppContainer.shared.resolve(type: T.self)
+//        value = resolvedValue
+//        return resolvedValue
+//    }
+//    
+//    public init() {}
+//    
+//    /// Allows setting a mock value for testing purposes.
+//    /// Must be called from MainActor.
+//    #if DEBUG
+//    public func setForTesting(_ newValue: T) {
+//        value = newValue
+//    }
+//    #endif
+//}
+//#endif
